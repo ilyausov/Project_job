@@ -1,0 +1,425 @@
+#include <vcl.h>
+#include "ISO.h"
+#include "ISO813.h"
+#include "ISODA.h"
+#include "Dll1.H"
+#include "External.h"
+#include "ACL_PCI.h"
+#include "DAQHeader.h"
+#include "Dask.h"
+
+//#include <stm32f10x.h>  // для счетчика?
+//---------------------------------------------------------------------------
+//--Файл описания интерфейсов внешних устройств--//
+//---------------------------------------------------------------------------
+// необъектные функции
+int OpenISO_P32C32 (); // попытка связаться с драйвером ISO-P32C32
+int OpenACL_7225_1 ();   // попытка связаться с драйвером ACL-7225
+int OpenACL_7225_2 ();   // попытка связаться с драйвером ACL-7225
+int OpenISO_813 ();    // попытка связаться с драйвером ISO-813
+int OpenISO_DA16();    // попытка связаться с драйвером ISO-DA16
+int OpenACL_7250 ();   // попытка связаться с драйвером ACL-7250
+//---------------------------------------------------------------------------
+// чтение/запись дискретных сигналов в ACL-7225
+unsigned int ACL7225_1 ( unsigned int aclState , unsigned int* value );
+unsigned int ACL7225_2 ( unsigned int aclState , unsigned int* value );
+// чтение/запись дискретных сигналов в P32C32
+unsigned int ISO_P32C32_1 ( unsigned int isoState , unsigned int* value );
+unsigned int ISO_P32C32_2 ( unsigned int isoState , unsigned int* value );
+// чтение аналоговых сигналов с 813
+unsigned int ISO_813 ( unsigned int* value , char valueCount );
+// запись аналоговых сигналов в DA16 и чтение уставок
+unsigned int ISO_DA16 ( unsigned int isoState, unsigned int value, unsigned int* valueKon, int signNmb );
+// чтение/запись дискретных сигналов в ACL-7250
+unsigned int ACL7250 ( unsigned int aclState , unsigned int* value );
+// чтение/запись дискретных сигналов в PCI-1730
+unsigned int PCI1730 ( unsigned int State , unsigned int* value );
+//---------------------------------------------------------------------------
+//--Связаться с драйвером ISO-DA16--//
+//---------------------------------------------------------------------------
+int OpenISO_DA16 ()
+{
+    ISODA_DriverInit();
+    return isoDA16err = ISODA_CheckBoard( 0 , base_DA16 , 0 );
+}
+//---------------------------------------------------------------------------
+//--Связаться с драйвером ISO-P32C32--//
+//---------------------------------------------------------------------------
+int OpenISO_P32C32 ()
+{
+    isoP32C32err1 = ISO_DriverInit();
+	return isoP32C32err2 = isoP32C32err1;
+}
+//---------------------------------------------------------------------------
+//--Связаться с драйвером ACL-7225--//
+//---------------------------------------------------------------------------
+int OpenACL_7225_1 ()
+{
+    return iso7225err1 = W_7225_Initial( CARD_1 , base_7225_1 );
+}
+int OpenACL_7225_2 ()
+{
+    return iso7225err2 = W_7225_Initial( CARD_2 , base_7225_2 );
+}
+//---------------------------------------------------------------------------
+//--Связаться с драйвером ISO-813--//
+//---------------------------------------------------------------------------
+int OpenISO_813 ()
+{
+    return iso813err = ISO813_DriverInit();
+}
+//---------------------------------------------------------------------------
+//--Связаться с драйвером ACL-7250--//
+//---------------------------------------------------------------------------
+int OpenACL_7250 ()
+{
+    return iso7250err = Register_Card(PCI_7250, 0);
+}
+//---------------------------------------------------------------------------
+//--ACL7225--//
+//---------------------------------------------------------------------------
+unsigned int ACL7225_1 ( unsigned int aclState , unsigned int* value )
+{
+    // если плата неработоспособна
+    if ( iso7225err1 != ERR_NoError )
+    {
+        // пробуем снова ее открыть
+        return OpenACL_7225_1();
+    }
+    // если ошибок нет, считываем данные
+    else
+    {
+        W_7225_Set_Card(CARD_1);
+        switch ( aclState )
+        {
+            // чтение дискретных сигналов
+            case 0:
+            {
+                iso7225err1 = W_7225_DI ( &value[2] );
+            }; break;
+            // запись дискретных сигналов
+            case 1:
+            {
+                iso7225err1 = W_7225_DO ( value[2] );
+            }; break;
+        }
+    }
+    // возвращаем код ошибки
+    return iso7225err1;
+}
+//---------------------------------------------------------------------------
+unsigned int ACL7225_2 ( unsigned int aclState , unsigned int* value )
+{
+    // если плата неработоспособна
+    if ( iso7225err2 != ERR_NoError )
+    {
+        // пробуем снова ее открыть
+        return OpenACL_7225_2();
+    }
+    // если ошибок нет, считываем данные
+    else
+    {
+        W_7225_Set_Card(CARD_2);
+        switch ( aclState )
+        {
+            // чтение дискретных сигналов
+            case 0:
+            {
+                iso7225err2 = W_7225_DI ( &value[3] );
+            }; break;
+            // запись дискретных сигналов
+            case 1:
+            {
+                iso7225err2 = W_7225_DO ( value[3] );
+            }; break;
+        }
+    }
+    // возвращаем код ошибки
+    return iso7225err2;
+}
+//---------------------------------------------------------------------------
+//--ISO-P32C32--//
+//---------------------------------------------------------------------------
+unsigned int ISO_P32C32_1 ( unsigned int isoState , unsigned int* value )
+{
+    // если плата неработоспособна
+    if ( isoP32C32err1 )
+    {
+        // отрубить связь с платой
+        ISO_DriverClose();
+        // пробуем снова ее открыть
+        return OpenISO_P32C32();
+    }
+    // если ошибок нет, считываем данные
+    else
+    {
+        switch ( isoState )
+        {
+            case 0:
+            {
+                unsigned int
+                    t1 =   ( ~ ISO_InputByte ( (Word) (base_P32C32_1 + 0) ) ) & 0xFF,
+                    t2 = ( ( ~ ISO_InputByte ( (Word) (base_P32C32_1 + 1) ) ) & 0xFF ) << 8;
+                    value[0] = t1 + t2;
+
+                    t1 =   ( ~ ISO_InputByte ( (Word) (base_P32C32_1 + 2) ) ) & 0xFF;
+                    t2 = ( ( ~ ISO_InputByte ( (Word) (base_P32C32_1 + 3) ) ) & 0xFF ) << 8;
+                    value[1] = t1 + t2;
+            }; break;
+            case 1:
+            {
+                unsigned int
+                    t1 = value[0] & 0x00FF,
+                    t2 = ( value[0] & 0xFF00 ) >> 8;
+                ISO_OutputByte( (Word)(base_P32C32_1 + 0) , (BYTE)(t1) );
+                ISO_OutputByte( (Word)(base_P32C32_1 + 1) , (BYTE)(t2) );
+                    t1 = value[1] & 0x00FF,
+                    t2 = ( value[1] & 0xFF00 ) >> 8;
+                ISO_OutputByte( (Word)(base_P32C32_1 + 2) , (BYTE)(t1) );
+                ISO_OutputByte( (Word)(base_P32C32_1 + 3) , (BYTE)(t2) );
+            }; break;
+        }
+    }
+    // возвращаем код ошибки
+    return isoP32C32err1;
+}
+//---------------------------------------------------------------------------
+unsigned int ISO_P32C32_2 ( unsigned int isoState , unsigned int* value )
+{
+    // если плата неработоспособна
+    if ( isoP32C32err2 )
+    {
+        // отрубить связь с платой
+        ISO_DriverClose();
+        // пробуем снова ее открыть
+        return OpenISO_P32C32();
+    }
+    // если ошибок нет, считываем данные
+    else
+    {
+        switch ( isoState )
+        {
+            case 0:
+            {
+                unsigned int
+                    t1 =   ( ~ ISO_InputByte ( (Word) (base_P32C32_2 + 0) ) ) & 0xFF,
+                    t2 = ( ( ~ ISO_InputByte ( (Word) (base_P32C32_2 + 1) ) ) & 0xFF ) << 8;
+                    value[2] = t1 + t2;
+
+                    //t1 =   ( ~ ISO_InputByte ( (Word) (base_P32C32_2 + 2) ) ) & 0xFF;
+                    //t2 = ( ( ~ ISO_InputByte ( (Word) (base_P32C32_2 + 3) ) ) & 0xFF ) << 8;
+                    //value[1] = t1 + t2;
+            }; break;
+            case 1:
+            {
+                unsigned int
+                    t1 = value[2] & 0x00FF,
+                    t2 = ( value[2] & 0xFF00 ) >> 8;
+                ISO_OutputByte( (Word)(base_P32C32_2 + 0) , (BYTE)(t1) );
+                ISO_OutputByte( (Word)(base_P32C32_2 + 1) , (BYTE)(t2) );
+                //    t1 = value[1] & 0x00FF,
+                //    t2 = ( value[1] & 0xFF00 ) >> 8;
+                //ISO_OutputByte( (Word)(base_P32C32_2 + 2) , (BYTE)(t1) );
+                //ISO_OutputByte( (Word)(base_P32C32_2 + 3) , (BYTE)(t2) );
+            }; break;
+        }
+    }
+    // возвращаем код ошибки
+    return isoP32C32err2;
+}
+//---------------------------------------------------------------------------
+//--Усреднение значения (фильтр)--//
+//---------------------------------------------------------------------------
+unsigned int DoAverageValue(unsigned char valueNmb, unsigned int value)
+{
+    unsigned char
+        minValueNmb = 0,
+        maxValueNmb = 0;
+    unsigned int
+        sum = 0;
+    for ( unsigned char i = 0 ; i < ( VALUE_COUNT - 1 ) ; i++ )
+        avrgAikValues[valueNmb][i] = avrgAikValues[valueNmb][i+1];
+    avrgAikValues[valueNmb][VALUE_COUNT - 1] = value;
+    for ( unsigned char i = 1 ; i < ( VALUE_COUNT - 1 ) ; i++ )
+    {
+        if ( avrgAikValues[valueNmb][i] < avrgAikValues[valueNmb][minValueNmb] ) minValueNmb = i;
+        if ( avrgAikValues[valueNmb][i] > avrgAikValues[valueNmb][maxValueNmb] ) maxValueNmb = i;
+    }
+    if ( minValueNmb == maxValueNmb ) return avrgAikValues[valueNmb][0];
+    else
+    {
+        for ( unsigned char i = 0 ; i < VALUE_COUNT ; i++ )
+        {
+            if ( ( i != minValueNmb ) && ( i != maxValueNmb ) )
+                sum += avrgAikValues[valueNmb][i];
+        }
+        return sum / ( VALUE_COUNT - 2 );
+    }
+}
+//---------------------------------------------------------------------------
+//--ISO-813--//
+//---------------------------------------------------------------------------
+unsigned int ISO_813 ( unsigned int* value , int valueCount )
+{
+    // если плата неработоспособна
+    if ( iso813err )
+    {
+        // отрубить связь с платой
+        ISO813_DriverClose();
+        // пробуем снова ее открыть
+        return OpenISO_813();
+    }
+    // если ошибок нет, считываем данные
+    else
+    {
+        for ( int i = 0 ; i < valueCount ; i++ )
+            value[i] = DoAverageValue(i, ISO813_AD_Hex(base_813,i,0));
+    }
+    // возвращаем код ошибки
+    return iso813err;
+}
+//---------------------------------------------------------------------------
+//--ISO-DA16--//
+//---------------------------------------------------------------------------
+unsigned int ISO_DA16 ( unsigned int isoState, unsigned int value, unsigned int* valueKon, int signNmb )
+{
+    switch ( isoState )
+    {
+        // запись уставки
+        case 0:
+        {
+            // если плата неработоспособна
+            if ( isoDA16err )
+            {
+                // отрубить связь с платой
+                ISODA_DriverClose();
+                // пробуем снова ее открыть
+                return OpenISO_DA16();
+            }
+            // если ошибок нет, записываем данные
+            else
+            {
+                // убираем функцию записи с дублированием в ПЗУ
+                ISODA_AnalogOutput( signNmb , value );
+            }
+            // возвращаем код ошибки
+            return isoDA16err;
+        }; break;
+        // чтение уставок
+        case 1:
+        {
+
+            // если плата неработоспособна
+            if ( isoDA16err )
+            {
+                // отрубить связь с платой
+                ISODA_DriverClose();
+                // пробуем снова ее открыть
+                return OpenISO_DA16();
+            }
+            // если ошибок нет, записываем данные
+            else
+            {
+                DWORD valDWord[1];
+                ISODA_ReadPowerOnValue(signNmb , valDWord);
+                valueKon[signNmb] = (unsigned int)(valDWord[0]&0xFFFF);
+            }
+            // возвращаем код ошибки
+            return isoDA16err;
+
+        }; break;
+    }
+}
+//---------------------------------------------------------------------------
+//--ACL7250--//
+//---------------------------------------------------------------------------
+unsigned int ACL7250 ( unsigned int aclState , unsigned int* value )
+{
+  unsigned long zH1 = 0;
+  unsigned long zH2 = 0;
+  unsigned long zH3 = 0;
+    // если плата неработоспособна
+    if ( iso7250err != ERR_NoError )
+    {
+        // пробуем снова ее открыть
+        return OpenACL_7250();
+    }
+    // если ошибок нет, считываем данные
+    else
+    {
+        switch ( aclState )
+        {
+            // чтение дискретных сигналов
+            case 0:
+            {
+                DI_ReadPort(0, 0x00, &zH1);
+                DI_ReadPort(0, 0x01, &zH2);
+				//DI_ReadPort(0, 0x02, &zH3);
+                zH2 = (zH2 << 8) & 0xFFFF;
+                value[4] = zH1 + zH2;
+                //value[4] = zH3;
+            }; break;
+            // запись дискретных сигналов
+            case 1:
+            {
+                unsigned short v1 = (unsigned short)value[4] & 0xFF;
+                unsigned long  h  = value[4] >> 8;
+                unsigned short v2 = (unsigned short)h & 0xFF;
+				//unsigned short v3 = (unsigned short)value[4] & 0xFF;
+
+                DO_WritePort(0, 0x00, v1);
+                DO_WritePort(0, 0x01, v2);
+				//DO_WritePort(0, 0x02, v3);
+            }; break;
+        }
+    }
+    // возвращаем код ошибки
+    return iso7250err;
+}
+//---------------------------------------------------------------------------
+// чтение/запись дискретных сигналов в PCI-1730
+//---------------------------------------------------------------------------
+unsigned int PCI1730 ( unsigned int State , unsigned int* value )
+{
+    switch ( State )
+    {
+        // чтение дискретных сигналов
+        case 0:
+        {
+            InstantDiCtrl * ctrl = InstantDiCtrl::Create();
+
+            DeviceInformation devInfo(0);
+            ctrl->setSelectedDevice(devInfo);
+
+            byte b1,b2;
+            ctrl->Read(0, 1, &b1);
+            ctrl->Read(1, 1, &b2);
+
+            value[3] = b1 + (b2 << 8);
+
+            ctrl->Cleanup();
+            ctrl->Dispose();
+        }; break;
+        // запись дискретных сигналов
+        case 1:
+        {
+            InstantDoCtrl * ctrl = InstantDoCtrl::Create();
+
+            DeviceInformation devInfo(0);
+            ctrl->setSelectedDevice(devInfo);
+
+            byte b1,b2;
+            b1 = Byte(value[3]&0xFF);
+            b2 = Byte((value[3]&0xFF00) >> 8);
+
+            ctrl->Write(0, 1, &b1);
+            ctrl->Write(1, 1, &b2);
+
+            ctrl->Cleanup();
+            ctrl->Dispose();
+        }; break;
+    }
+    // возвращаем код ошибки
+    return 0;
+}
+

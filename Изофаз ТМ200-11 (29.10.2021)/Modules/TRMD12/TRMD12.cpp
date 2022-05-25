@@ -1,0 +1,655 @@
+//---------------------------------------------------------------------------
+#include "TRMD12.h"
+//---------------------------------------------------------------------------
+//-- √енераци€ страницы --//
+//---------------------------------------------------------------------------
+void STRMD::TRMD_Gen()
+{
+	TS_Pan = new TTabSheet(SPort->PC_Com);
+	TS_Pan->PageControl = SPort->PC_Com;
+	TS_Pan->Caption = name;
+	TS_Pan->TabVisible = true;
+
+	Pnl_Parent = new TPanel(TS_Pan);
+	Pnl_Parent->Parent = TS_Pan;
+	Pnl_Parent->Caption = "";
+	//Pnl_Parent->BevelKind = bkFlat;
+    Pnl_Parent->Color = clSilver;
+	Pnl_Parent->BevelOuter = bvRaised;
+	Pnl_Parent->BorderStyle = bsNone;
+	Pnl_Parent->Height = 676;
+	Pnl_Parent->Width = 1176;
+
+	Lbl_Adr = new TLabel(Pnl_Parent);
+	Lbl_Adr->Parent = Pnl_Parent;
+	Lbl_Adr->Top = 15;
+	Lbl_Adr->Left = 26;
+	Lbl_Adr->Caption = "јдрес устройства: " + adr;
+	Lbl_Adr->Font->Name = "Arial";
+	Lbl_Adr->Font->Size = 12;
+	Lbl_Adr->Font->Color = clBlack;
+	Lbl_Adr->Font->Style = Lbl_Adr->Font->Style << fsBold;
+	Lbl_Adr->Transparent = true;
+	Lbl_Adr->Height = 19;
+	Lbl_Adr->Width = 190;
+	Lbl_Adr->Layout = tlTop;
+	
+	RB_prd = new TRadioButton(Pnl_Parent);
+	RB_prd->Parent = Pnl_Parent;
+	RB_prd->Top = 18;
+	RB_prd->Left = 238;
+	RB_prd->Height = 14;
+	RB_prd->Width = 14;
+	RB_prd->Caption = "";
+	
+	RB_prm = new TRadioButton(Pnl_Parent);
+	RB_prm->Parent = Pnl_Parent;
+	RB_prm->Top = 18;
+	RB_prm->Left = 278;
+	RB_prm->Height = 14;
+	RB_prm->Width = 14;
+	RB_prm->Caption = "";
+		
+	GB_Main = new TGroupBox(Form1);
+	GB_Main->Parent = Pnl_Parent;
+	GB_Main->Top = 56;
+	GB_Main->Left = 26;
+	GB_Main->Height = 135;
+	//GB_Main->Width = 385;
+	GB_Main->Width = 1124;
+	GB_Main->Caption = " ƒанные ";
+	GB_Main->Font->Name = "Arial";
+	GB_Main->Font->Size = 12;
+	GB_Main->Font->Color = clBlack;
+	GB_Main->Font->Style = GB_Main->Font->Style << fsBold;
+	
+	Lbl_Uni = new TLabel(GB_Main);
+	Lbl_Uni->Parent = GB_Main;
+	Lbl_Uni->Top = 52;
+	Lbl_Uni->Left = 28;
+	Lbl_Uni->Caption = "«адани€:";
+	Lbl_Uni->Font->Name = "Arial";
+	Lbl_Uni->Font->Size = 12;
+	Lbl_Uni->Font->Color = clBlack;
+	Lbl_Uni->Transparent = true;
+	Lbl_Uni->Height = 19;
+	Lbl_Uni->Width = 190;
+	Lbl_Uni->Layout = tlTop;
+	Lbl_Uni->Font->Style = Lbl_Uni->Font->Style >> fsBold;
+	
+	Lbl_Uni = new TLabel(GB_Main);
+	Lbl_Uni->Parent = GB_Main;
+	Lbl_Uni->Top = 84;
+	Lbl_Uni->Left = 28;
+	Lbl_Uni->Caption = "“екущие:";
+	Lbl_Uni->Font->Name = "Arial";
+	Lbl_Uni->Font->Size = 12;
+	Lbl_Uni->Font->Color = clBlack;
+	Lbl_Uni->Transparent = true;
+	Lbl_Uni->Height = 19;
+	Lbl_Uni->Width = 190;
+	Lbl_Uni->Layout = tlTop;
+	Lbl_Uni->Font->Style = Lbl_Uni->Font->Style >> fsBold;
+	
+	for(int i=0;i<TRMD_CH_COUNT;i++)
+	{
+		Lbl_Uni = new TLabel(GB_Main);
+		Lbl_Uni->Parent = GB_Main;
+		Lbl_Uni->Top = 28;
+		Lbl_Uni->Left = 125 + 60*i;
+		Lbl_Uni->Caption = " анал " + IntToStr(i+1);
+		Lbl_Uni->Font->Name = "Arial";
+		Lbl_Uni->Font->Size = 10;
+		Lbl_Uni->Font->Color = clBlack;
+		Lbl_Uni->Transparent = true;
+		Lbl_Uni->Height = 19;
+		Lbl_Uni->Width = 190;
+		Lbl_Uni->Layout = tlTop;
+		Lbl_Uni->Font->Style = Lbl_Uni->Font->Style >> fsBold;
+		
+		Edt_Zad[i] = new TEdit(GB_Main);
+		Edt_Zad[i]->Parent = GB_Main;
+		Edt_Zad[i]->Top = 47;
+		Edt_Zad[i]->Left = 120 + 60*i;
+		Edt_Zad[i]->Font->Name = "Arial";
+		Edt_Zad[i]->Font->Size = 13;
+		Edt_Zad[i]->Font->Color = clBlack;
+		Edt_Zad[i]->Font->Style = Edt_Zad[i]->Font->Style >> fsBold;
+		Edt_Zad[i]->BevelKind = bkFlat;
+		Edt_Zad[i]->BevelOuter = bvRaised;
+		Edt_Zad[i]->BorderStyle = bsNone;
+		Edt_Zad[i]->ReadOnly = true;
+		Edt_Zad[i]->Color = clSkyBlue;
+		Edt_Zad[i]->Height = 26;
+		Edt_Zad[i]->Width = 55;
+		
+		Edt_Tek[i] = new TEdit(GB_Main);
+		Edt_Tek[i]->Parent = GB_Main;
+		Edt_Tek[i]->Top = 79;
+		Edt_Tek[i]->Left = 120 + 60*i;
+		Edt_Tek[i]->Font->Name = "Arial";
+		Edt_Tek[i]->Font->Size = 13;
+		Edt_Tek[i]->Font->Color = clBlack;
+		Edt_Tek[i]->Font->Style = Edt_Tek[i]->Font->Style >> fsBold;
+		Edt_Tek[i]->BevelKind = bkFlat;
+		Edt_Tek[i]->BevelOuter = bvRaised;
+		Edt_Tek[i]->BorderStyle = bsNone;
+		Edt_Tek[i]->ReadOnly = true;
+		Edt_Tek[i]->Color = clWhite;
+		Edt_Tek[i]->Height = 26;
+		Edt_Tek[i]->Width = 55;
+	}
+	
+	/*
+	
+	
+	Lbl_Uni = new TLabel(GB_Main);
+	Lbl_Uni->Parent = GB_Main;
+	Lbl_Uni->Top = 28;
+	Lbl_Uni->Left = 125;
+	Lbl_Uni->Caption = " анал 1";
+	Lbl_Uni->Font->Name = "Arial";
+	Lbl_Uni->Font->Size = 10;
+	Lbl_Uni->Font->Color = clBlack;
+	Lbl_Uni->Transparent = true;
+	Lbl_Uni->Height = 19;
+	Lbl_Uni->Width = 190;
+	Lbl_Uni->Layout = tlTop;
+	Lbl_Uni->Font->Style = Lbl_Uni->Font->Style >> fsBold;
+
+    Lbl_Uni = new TLabel(GB_Main);
+	Lbl_Uni->Parent = GB_Main;
+	Lbl_Uni->Top = 28;
+	Lbl_Uni->Left = 185;
+	Lbl_Uni->Caption = " анал 2";
+	Lbl_Uni->Font->Name = "Arial";
+	Lbl_Uni->Font->Size = 10;
+	Lbl_Uni->Font->Color = clBlack;
+	Lbl_Uni->Transparent = true;
+	Lbl_Uni->Height = 19;
+	Lbl_Uni->Width = 190;
+	Lbl_Uni->Layout = tlTop;
+	Lbl_Uni->Font->Style = Lbl_Uni->Font->Style >> fsBold;
+
+    Lbl_Uni = new TLabel(GB_Main);
+	Lbl_Uni->Parent = GB_Main;
+	Lbl_Uni->Top = 28;
+	Lbl_Uni->Left = 245;
+	Lbl_Uni->Caption = " анал 3";
+	Lbl_Uni->Font->Name = "Arial";
+	Lbl_Uni->Font->Size = 10;
+	Lbl_Uni->Font->Color = clBlack;
+	Lbl_Uni->Transparent = true;
+	Lbl_Uni->Height = 19;
+	Lbl_Uni->Width = 190;
+	Lbl_Uni->Layout = tlTop;
+	Lbl_Uni->Font->Style = Lbl_Uni->Font->Style >> fsBold;
+
+	Lbl_Uni = new TLabel(GB_Main);
+	Lbl_Uni->Parent = GB_Main;
+	Lbl_Uni->Top = 28;
+	Lbl_Uni->Left = 305;
+	Lbl_Uni->Caption = " анал 4";
+	Lbl_Uni->Font->Name = "Arial";
+	Lbl_Uni->Font->Size = 10;
+	Lbl_Uni->Font->Color = clBlack;
+	Lbl_Uni->Transparent = true;
+	Lbl_Uni->Height = 19;
+	Lbl_Uni->Width = 190;
+	Lbl_Uni->Layout = tlTop;
+	Lbl_Uni->Font->Style = Lbl_Uni->Font->Style >> fsBold;
+
+	Edt_Zad1 = new TEdit(GB_Main);
+	Edt_Zad1->Parent = GB_Main;
+	Edt_Zad1->Top = 47;
+	Edt_Zad1->Left = 120;
+	Edt_Zad1->Font->Name = "Arial";
+	Edt_Zad1->Font->Size = 13;
+	Edt_Zad1->Font->Color = clBlack;
+	Edt_Zad1->Font->Style = Edt_Zad1->Font->Style >> fsBold;
+	Edt_Zad1->BevelKind = bkFlat;
+	Edt_Zad1->BevelOuter = bvRaised;
+	Edt_Zad1->BorderStyle = bsNone;
+	Edt_Zad1->ReadOnly = true;
+	Edt_Zad1->Color = clSkyBlue;
+	Edt_Zad1->Height = 26;
+	Edt_Zad1->Width = 55;
+
+	Edt_Zad2 = new TEdit(GB_Main);
+	Edt_Zad2->Parent = GB_Main;
+	Edt_Zad2->Top = 47;
+	Edt_Zad2->Left = 180;
+	Edt_Zad2->Font->Name = "Arial";
+	Edt_Zad2->Font->Size = 13;
+	Edt_Zad2->Font->Color = clBlack;
+	Edt_Zad2->Font->Style = Edt_Zad2->Font->Style >> fsBold;
+	Edt_Zad2->BevelKind = bkFlat;
+	Edt_Zad2->BevelOuter = bvRaised;
+	Edt_Zad2->BorderStyle = bsNone;
+	Edt_Zad2->ReadOnly = true;
+	Edt_Zad2->Color = clSkyBlue;
+	Edt_Zad2->Height = 26;
+	Edt_Zad2->Width = 55;
+
+	Edt_Zad3 = new TEdit(GB_Main);
+	Edt_Zad3->Parent = GB_Main;
+	Edt_Zad3->Top = 47;
+	Edt_Zad3->Left = 240;
+	Edt_Zad3->Font->Name = "Arial";
+	Edt_Zad3->Font->Size = 13;
+	Edt_Zad3->Font->Color = clBlack;
+	Edt_Zad3->Font->Style = Edt_Zad3->Font->Style >> fsBold;
+	Edt_Zad3->BevelKind = bkFlat;
+	Edt_Zad3->BevelOuter = bvRaised;
+	Edt_Zad3->BorderStyle = bsNone;
+	Edt_Zad3->ReadOnly = true;
+	Edt_Zad3->Color = clSkyBlue;
+	Edt_Zad3->Height = 26;
+	Edt_Zad3->Width = 55;
+
+	Edt_Zad4 = new TEdit(GB_Main);
+	Edt_Zad4->Parent = GB_Main;
+	Edt_Zad4->Top = 47;
+	Edt_Zad4->Left = 300;
+	Edt_Zad4->Font->Name = "Arial";
+	Edt_Zad4->Font->Size = 13;
+	Edt_Zad4->Font->Color = clBlack;
+	Edt_Zad4->Font->Style = Edt_Zad4->Font->Style >> fsBold;
+	Edt_Zad4->BevelKind = bkFlat;
+	Edt_Zad4->BevelOuter = bvRaised;
+	Edt_Zad4->BorderStyle = bsNone;
+	Edt_Zad4->ReadOnly = true;
+	Edt_Zad4->Color = clSkyBlue;
+	Edt_Zad4->Height = 26;
+	Edt_Zad4->Width = 55;
+
+	Edt_Tek1 = new TEdit(GB_Main);
+	Edt_Tek1->Parent = GB_Main;
+	Edt_Tek1->Top = 79;
+	Edt_Tek1->Left = 120;
+	Edt_Tek1->Font->Name = "Arial";
+	Edt_Tek1->Font->Size = 13;
+	Edt_Tek1->Font->Color = clBlack;
+	Edt_Tek1->Font->Style = Edt_Tek1->Font->Style >> fsBold;
+	Edt_Tek1->BevelKind = bkFlat;
+	Edt_Tek1->BevelOuter = bvRaised;
+	Edt_Tek1->BorderStyle = bsNone;
+	Edt_Tek1->ReadOnly = true;
+	Edt_Tek1->Color = clWhite;
+	Edt_Tek1->Height = 26;
+	Edt_Tek1->Width = 55;
+
+	Edt_Tek2 = new TEdit(GB_Main);
+	Edt_Tek2->Parent = GB_Main;
+	Edt_Tek2->Top = 79;
+	Edt_Tek2->Left = 180;
+	Edt_Tek2->Font->Name = "Arial";
+	Edt_Tek2->Font->Size = 13;
+	Edt_Tek2->Font->Color = clBlack;
+	Edt_Tek2->Font->Style = Edt_Tek2->Font->Style >> fsBold;
+	Edt_Tek2->BevelKind = bkFlat;
+	Edt_Tek2->BevelOuter = bvRaised;
+	Edt_Tek2->BorderStyle = bsNone;
+	Edt_Tek2->ReadOnly = true;
+	Edt_Tek2->Color = clWhite;
+	Edt_Tek2->Height = 26;
+	Edt_Tek2->Width = 55;
+
+	Edt_Tek3 = new TEdit(GB_Main);
+	Edt_Tek3->Parent = GB_Main;
+	Edt_Tek3->Top = 79;
+	Edt_Tek3->Left = 240;
+	Edt_Tek3->Font->Name = "Arial";
+	Edt_Tek3->Font->Size = 13;
+	Edt_Tek3->Font->Color = clBlack;
+	Edt_Tek3->Font->Style = Edt_Tek3->Font->Style >> fsBold;
+	Edt_Tek3->BevelKind = bkFlat;
+	Edt_Tek3->BevelOuter = bvRaised;
+	Edt_Tek3->BorderStyle = bsNone;
+	Edt_Tek3->ReadOnly = true;
+	Edt_Tek3->Color = clWhite;
+	Edt_Tek3->Height = 26;
+	Edt_Tek3->Width = 55;
+
+	Edt_Tek4 = new TEdit(GB_Main);
+	Edt_Tek4->Parent = GB_Main;
+	Edt_Tek4->Top = 79;
+	Edt_Tek4->Left = 300;
+	Edt_Tek4->Font->Name = "Arial";
+	Edt_Tek4->Font->Size = 13;
+	Edt_Tek4->Font->Color = clBlack;
+	Edt_Tek4->Font->Style = Edt_Tek4->Font->Style >> fsBold;
+	Edt_Tek4->BevelKind = bkFlat;
+	Edt_Tek4->BevelOuter = bvRaised;
+	Edt_Tek4->BorderStyle = bsNone;
+	Edt_Tek4->ReadOnly = true;
+	Edt_Tek4->Color = clWhite;
+	Edt_Tek4->Height = 26;
+	Edt_Tek4->Width = 55;
+	*/
+}
+//---------------------------------------------------------------------------
+//-- ‘ункци€ формировани€ запроса --//
+//---------------------------------------------------------------------------
+void STRMD::TRMD_FrmZap( )
+{
+	// зависит от кол-ва каналов !!!
+	String temp_str = "";
+	ACom = 0;
+	
+	for(int i=0;(i<TRMD_CH_COUNT)&&(!ACom);i++)
+		if(!*Pr_Sv[i]) ACom = i+1;
+
+	if(!ACom) ACom = 13;
+
+	if((ACom>=1)&&(ACom<=12))
+	{
+		Edt_Zad[ACom-1]->Text = FloatToStrF(float(*ZadTemp[ACom-1])/10.0,ffFixed,5,1);
+		temp_str = ":";
+		temp_str += adr;
+		temp_str += "0600000000";
+		char temp_char[4] = {0};
+		String temp_date = "";
+		itoa((371+(1024)*(ACom-1)),temp_char,16);
+		temp_date = String(temp_char);
+		for(int i=0;i<temp_date.Length();i++)
+			temp_str[9-i] = temp_date[temp_date.Length() - i];	
+		itoa(*ZadTemp[ACom-1],temp_char,16);
+		temp_date = String(temp_char);
+		for(int i=0;i<temp_date.Length();i++)
+			temp_str[13-i] = temp_date[temp_date.Length() - i];
+	}
+	else
+	{
+		temp_str = ":";
+		temp_str += adr;
+		temp_str += "030000000C";
+	}
+
+	/*
+	switch(ACom)
+	{
+		case 1:
+			{
+				Edt_Zad1->Text = FloatToStrF(float(*ZadTemp1)/10.0,ffFixed,5,1);
+				temp_str = ":";
+				temp_str += adr;
+				temp_str += "0601730000";
+				char temp_char[4] = {0};
+				itoa(*ZadTemp1,temp_char,16);
+				String temp_date = "";
+				temp_date = String(temp_char);
+				for(int i=0;i<temp_date.Length();i++)
+			 		temp_str[13-i] = temp_date[temp_date.Length() - i];
+			};break;
+			case 2:
+			{
+				Edt_Zad2->Text = FloatToStrF(float(*ZadTemp2)/10.0,ffFixed,5,1);
+				temp_str = ":";
+				temp_str += adr;
+				temp_str += "0605730000";
+				char temp_char[4] = {0};
+				itoa(*ZadTemp2,temp_char,16);
+				String temp_date = "";
+				temp_date = String(temp_char);
+				for(int i=0;i<temp_date.Length();i++)
+			 		temp_str[13-i] = temp_date[temp_date.Length() - i];
+			};break;
+			case 3:
+			{
+				Edt_Zad3->Text = FloatToStrF(float(*ZadTemp3)/10.0,ffFixed,5,1);
+				temp_str = ":";
+				temp_str += adr;
+				temp_str += "0609730000";
+				char temp_char[4] = {0};
+				itoa(*ZadTemp3,temp_char,16);
+				String temp_date = "";
+				temp_date = String(temp_char);
+				for(int i=0;i<temp_date.Length();i++)
+			 		temp_str[13-i] = temp_date[temp_date.Length() - i];
+			};break;
+			case 4:
+			{
+				Edt_Zad4->Text = FloatToStrF(float(*ZadTemp4)/10.0,ffFixed,5,1);
+				temp_str = ":";
+				temp_str += adr;
+				temp_str += "060D730000";
+				char temp_char[4] = {0};
+				itoa(*ZadTemp4,temp_char,16);
+				String temp_date = "";
+				temp_date = String(temp_char);
+				for(int i=0;i<temp_date.Length();i++)
+			 		temp_str[13-i] = temp_date[temp_date.Length() - i];
+			};break;
+			case 5:
+			{
+				temp_str = ":";
+				temp_str += adr;
+				temp_str += "0300000004";
+			};break;
+		}
+	}	*/
+
+	for(int i=1;i<=temp_str.Length();i++)
+		SPort->PackOut[i-1] = temp_str[i];
+
+	unsigned int CRC = 0;
+	for(int i=1;i<12;i=i+2)
+	{
+		AnsiString tmp = "0x";
+        tmp = tmp + char(SPort->PackOut[i]);
+        tmp = tmp + char(SPort->PackOut[i+1]);
+		CRC += StrToInt(tmp);
+	}
+	CRC = (unsigned int)(0xff&(0x100-(CRC & 0xff)));
+	//char str[2];
+	//itoa(CRC,str,16);
+	String str = IntToHex((int)(CRC),2);
+	SPort->PackOut[13] = str[1];
+	SPort->PackOut[14] = str[2];
+	SPort->PackOut[15] = 13;
+	SPort->PackOut[16] = 10;
+	Buf_len = 17;
+}
+//---------------------------------------------------------------------------
+//-- ‘ункци€ обработки ответа --//
+//---------------------------------------------------------------------------
+bool STRMD::TRMD_ChkRep( )
+{
+    for(int i=0;i<PACKAGE_COUNT;i++)
+	{
+		if( (SPort->PackIn[2]==adr[2])&&
+			(SPort->PackIn[i]==10)&&
+			(SPort->PackIn[i-1]==13))	// есть конец посылки
+		{
+            // проверка на нормальные цифры
+            for(int j=7;j<i-1;j++)
+            {
+                if(!isxdigit(SPort->PackIn[j])) return 0;
+            }
+
+            if((ACom>=1)&&(ACom<=12))
+            {
+                *Pr_Sv[ACom-1] = 1;
+            }
+            else
+            {
+                for(int j=0;j<TRMD_CH_COUNT;j++)
+                {
+                    if(isxdigit(SPort->PackIn[7+4*(j)])&&isxdigit(SPort->PackIn[8+4*(j)])&&isxdigit(SPort->PackIn[9+4*(j)])&&isxdigit(SPort->PackIn[10+4*(j)]))
+                                        {
+                                        const char tmp1[6] = {  '0','x',
+                                        SPort->PackIn[7+4*(j)],
+										  SPort->PackIn[8+4*(j)],
+										  SPort->PackIn[9+4*(j)],
+										  SPort->PackIn[10+4*(j)]};
+                    *TekTemp[j] = strtol(tmp1,NULL,16);
+                    Edt_Tek[j]->Text = FloatToStrF(float(*TekTemp[j])/10.0,ffFixed,5,1);
+                }
+                }
+            }
+            return 1;
+        }
+    }
+    return 0;
+/*
+
+				{
+					const char tmp1[4] = {SPort->PackIn[7],
+										  SPort->PackIn[8],
+										  SPort->PackIn[9],
+										  SPort->PackIn[10]};
+					*TekTemp1 = strtol(tmp1,NULL,16);
+                                        Edt_Tek1->Text = FloatToStrF(float(*TekTemp1)/10.0,ffFixed,5,1);
+					const char tmp2[4] = {SPort->PackIn[11],
+										  SPort->PackIn[12],
+										  SPort->PackIn[13],
+										  SPort->PackIn[14]};
+					*TekTemp2 = strtol(tmp2,NULL,16);
+					Edt_Tek2->Text = FloatToStrF(float(*TekTemp2)/10.0,ffFixed,5,1);
+					const char tmp3[4] = {SPort->PackIn[15],
+										  SPort->PackIn[16],
+										  SPort->PackIn[17],
+										  SPort->PackIn[18]};
+					*TekTemp3 = strtol(tmp3,NULL,16);
+					Edt_Tek3->Text = FloatToStrF(float(*TekTemp3)/10.0,ffFixed,5,1);
+					const char tmp4[4] = {SPort->PackIn[19],
+										  SPort->PackIn[20],
+										  SPort->PackIn[21],
+										  SPort->PackIn[22]};
+					*TekTemp4 = strtol(tmp4,NULL,16);
+					Edt_Tek4->Text = FloatToStrF(float(*TekTemp4)/10.0,ffFixed,5,1);
+				}
+			}
+            *Pr_Sv = 1;
+			return 1;
+		}
+	}
+	return 0;
+	*/
+}
+//---------------------------------------------------------------------------
+//-- ‘ункци€ св€зи с датчиком --//
+//---------------------------------------------------------------------------
+bool STRMD::TRMD_Manage(unsigned int SH)
+{
+	// переключение радиобаттонов на страницах датчиков при их работе
+	RB_prd->Checked = !SH;
+    RB_prm->Checked = SH;
+
+    if(SH == 0) // посылка запроса
+	{
+		SPort->PackageClear();
+		// ‘ункци€ формировани€ запроса
+		TRMD_FrmZap( );
+		SPort->VisPackASCII(0);
+
+		// очистка буфера приЄма
+		SPort->Port.ResetRB();
+		// отправка посылки
+		SPort->Port.Write(SPort->PackOut,Buf_len);
+		// переход на следующий шаг
+		SPort->DevState++;
+		// обнуление времени
+		SPort->Dev_Timer = 0;
+		return 0;
+	}
+	else if(SH == 1)
+	{
+		// чтение ответа
+		SPort->Port.Read(SPort->PackIn,PACKAGE_COUNT);
+		// проверка ответа
+		if(TRMD_ChkRep( ))
+		{
+			TRMD_ChkRep( );
+			SPort->VisPackASCII(1);
+			// переход на следующий шаг
+			SPort->DevState++;
+			// сброс счетчика ошибок св€зи
+			Err = 0;
+			return 0;
+		}
+		else
+		{
+            if(SPort->Dev_Timer < SPort->Dev_TK) return 0; // ждем ответа
+			// не дождались
+			SPort->DevState++; // переходим к следующему устройству
+			// увеличение счетчика ошибок св€зи и провер€ем на максимум
+			if((Err++) > Max_err)
+				return 1;
+			return 0;
+		}
+    }
+}
+//---------------------------------------------------------------------------
+//-- »нициализаци€ структур --//
+//---------------------------------------------------------------------------
+void Init_TRMD()
+{
+	for(int i=0;i<TRMD_COUNT;i++ )
+		TRMD[i] = new STRMD();
+
+	// “ермодат 1
+	TRMD[0]->name = "“ермодат1";            // название дл€ отображени€
+	TRMD[0]->adr = "03";			// адрес
+	
+	for(int i=0;i<TRMD_CH_COUNT;i++)
+	{
+		TRMD[0]->ZadTemp[i] = &ObjBPN[i]->zadBPN;
+		TRMD[0]->TekTemp[i] = &ObjBPN[i]->tekBPN;
+		TRMD[0]->Pr_Sv[i] = &ObjBPN[i]->prBPN;			// переменные режима
+	}
+	
+	/*
+	TRMD[0]->ZadTemp1 = &ZAD_TEMP1;      // переменные режима
+	TRMD[0]->ZadTemp2 = &ZAD_TEMP2;      // переменные режима
+	TRMD[0]->ZadTemp3 = &ZAD_TEMP3;      // переменные режима
+	TRMD[0]->ZadTemp4 = &ZAD_TEMP4;      // переменные режима
+	TRMD[0]->TekTemp1 = &TEK_TEMP1;      // переменные режима
+	TRMD[0]->TekTemp2 = &TEK_TEMP2;      // переменные режима
+	TRMD[0]->TekTemp3 = &TEK_TEMP3;      // переменные режима
+	TRMD[0]->TekTemp4 = &TEK_TEMP4;      // переменные режима
+	*/
+		
+	TRMD[0]->SPort = Comport[1];     // порт
+	TRMD[0]->diagnS_byte = 0;        // номер байта св€зной диагностики
+	TRMD[0]->diagnS_mask = 0x10;		// маска байта св€зной диагностики
+
+	TRMD[0]->ACom = 1;				// номер запроса
+	TRMD[0]->Err = 0;				// кол-во ошибок
+	TRMD[0]->Max_err = 5;			// максимум ошибок
+	TRMD[0]->Buf_len = 0;			// длина запроса
+	TRMD[0]->TRMD_Gen();
+	
+	// “ермодат 2
+	TRMD[1]->name = "“ермодат2";            // название дл€ отображени€
+	TRMD[1]->adr = "04";			// адрес
+	
+	for(int i=0;i<TRMD_CH_COUNT;i++)
+	{
+		TRMD[1]->ZadTemp[i] = &ObjBPN[i+12]->zadBPN;
+		TRMD[1]->TekTemp[i] = &ObjBPN[i+12]->tekBPN;
+		TRMD[1]->Pr_Sv[i] = &ObjBPN[i+12]->prBPN;			// переменные режима
+	}
+	
+	/*
+	TRMD[0]->ZadTemp1 = &ZAD_TEMP1;      // переменные режима
+	TRMD[0]->ZadTemp2 = &ZAD_TEMP2;      // переменные режима
+	TRMD[0]->ZadTemp3 = &ZAD_TEMP3;      // переменные режима
+	TRMD[0]->ZadTemp4 = &ZAD_TEMP4;      // переменные режима
+	TRMD[0]->TekTemp1 = &TEK_TEMP1;      // переменные режима
+	TRMD[0]->TekTemp2 = &TEK_TEMP2;      // переменные режима
+	TRMD[0]->TekTemp3 = &TEK_TEMP3;      // переменные режима
+	TRMD[0]->TekTemp4 = &TEK_TEMP4;      // переменные режима
+	*/
+		
+	TRMD[1]->SPort = Comport[1];     // порт
+	TRMD[1]->diagnS_byte = 0;        // номер байта св€зной диагностики
+	TRMD[1]->diagnS_mask = 0x20;		// маска байта св€зной диагностики
+
+	TRMD[1]->ACom = 1;				// номер запроса
+	TRMD[1]->Err = 0;				// кол-во ошибок
+	TRMD[1]->Max_err = 5;			// максимум ошибок
+	TRMD[1]->Buf_len = 0;			// длина запроса
+	TRMD[1]->TRMD_Gen();
+}
